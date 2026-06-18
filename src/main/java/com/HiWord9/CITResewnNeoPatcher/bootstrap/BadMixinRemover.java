@@ -65,16 +65,8 @@ public class BadMixinRemover {
             String fileName = modFile.getName();
             if (!shouldReadModFile(fileName)) continue;
 
-            JsonObject currentFabricConfig;
-            try {
-                currentFabricConfig = getFabricConfig(modFile);
-            } catch (Exception e) {
-                CITResewnNeoPatcherBootstrap.LOGGER.error("Error while reading fabric.mod.json from {}, ignoring", modFile.getName(), e);
-                continue;
-            }
+            JsonObject currentFabricConfig = getCitrFabricConfig(modFile);
             if (currentFabricConfig == null) continue;
-
-            if (!isCITR(getId(currentFabricConfig))) continue;
 
             CITRCandidate candidate = new CITRCandidate(modFile, currentFabricConfig);
             if (fileName.startsWith(PATCHED_PREFIX)) {
@@ -167,6 +159,19 @@ public class BadMixinRemover {
         currentCitrPath = originalCitrPath;
         currentPatchedPath = TEMP_DIR.resolve(PATCHED_PREFIX + currentCitrPath.getFileName());
         finalDestPatchedPath = MODS_DIR_PATH.resolve(currentPatchedPath.getFileName());
+    }
+
+    // Reads a mod file's fabric.mod.json and returns it only if the file is the CITResewn mod, null otherwise.
+    static @Nullable JsonObject getCitrFabricConfig(File modFile) {
+        JsonObject config;
+        try {
+            config = getFabricConfig(modFile);
+        } catch (Exception e) {
+            CITResewnNeoPatcherBootstrap.LOGGER.error("Error while reading fabric.mod.json from {}, ignoring", modFile.getName(), e);
+            return null;
+        }
+        if (config == null) return null;
+        return isCITR(getId(config)) ? config : null;
     }
 
     private static @Nullable JsonObject getFabricConfig(File modFile) throws IOException {
