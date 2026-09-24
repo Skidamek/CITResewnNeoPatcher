@@ -39,6 +39,14 @@ dependencies {
     compileOnly("net.neoforged.fancymodloader:loader:${fancy_mod_loader_version}")
     compileOnly("cpw.mods:securejarhandler:3.0.8")
     compileOnly("org.jetbrains:annotations:24.1.0")
+
+    testImplementation platform("org.junit:junit-bom:5.10.2")
+    testImplementation "org.junit.jupiter:junit-jupiter"
+    testRuntimeOnly "org.junit.platform:junit-platform-launcher"
+    // the finder reads fabric.mod.json with the same gson the loader ships, and logs through the
+    // same slf4j api the bootstrap uses
+    testRuntimeOnly "com.google.code.gson:gson:2.10.1"
+    testRuntimeOnly "org.slf4j:slf4j-api:2.0.13"
     jij(project(path: ":mod", configuration: "builtModJar"))
 
     compileOnly "maven.modrinth:connector:2.0.0-beta.3+1.21.1"
@@ -66,6 +74,10 @@ jar {
             }
         }
     }
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
 }
 
 tasks.named('wrapper', Wrapper).configure {

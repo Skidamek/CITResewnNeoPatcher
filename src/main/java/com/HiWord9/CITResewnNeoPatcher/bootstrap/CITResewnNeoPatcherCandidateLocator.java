@@ -5,9 +5,8 @@ import net.neoforged.neoforgespi.locating.IDiscoveryPipeline;
 import net.neoforged.neoforgespi.locating.IModFileCandidateLocator;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 public class CITResewnNeoPatcherCandidateLocator implements IModFileCandidateLocator {
 
@@ -42,18 +41,9 @@ public class CITResewnNeoPatcherCandidateLocator implements IModFileCandidateLoc
     // Returns the path of the original citresewn-*.jar as seen by the NIO filesystem,
     // so the path is identity-equal to what ModsFolderLocator would use in its scan.
     private static @Nullable Path findOriginalCitrJar() {
-        try (var stream = Files.list(BadMixinRemover.MODS_DIR_PATH)) {
-            return stream
-                    .filter(p -> {
-                        String name = p.getFileName().toString();
-                        return name.endsWith(BadMixinRemover.JAR_SUFFIX) && !name.startsWith(BadMixinRemover.PATCHED_PREFIX);
-                    })
-                    .filter(p -> BadMixinRemover.getCitrFabricConfig(p.toFile()) != null)
-                    .findFirst()
-                    .orElse(null);
-        } catch (IOException e) {
-            CITResewnNeoPatcherBootstrap.LOGGER.error("Error scanning mods directory for CITResewn jar", e);
-            return null;
-        }
+        List<CitrCandidateFinder.CITRCandidate> originals = CitrCandidateFinder.find(
+                List.of(BadMixinRemover.MODS_DIR_PATH), BadMixinRemover.MODS_DIR_PATH
+        ).originalCandidates();
+        return originals.isEmpty() ? null : originals.getFirst().file().toPath();
     }
 }

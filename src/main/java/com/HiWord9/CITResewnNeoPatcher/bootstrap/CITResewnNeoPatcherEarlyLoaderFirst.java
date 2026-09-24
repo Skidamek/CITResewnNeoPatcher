@@ -58,7 +58,7 @@ public class CITResewnNeoPatcherEarlyLoaderFirst implements IDependencyLocator {
             if (modFile.isDirectory()) continue;
 
             String name = modFile.getName();
-            boolean shouldBeRead = BadMixinRemover.shouldReadModFile(name);
+            boolean shouldBeRead = CitrCandidateFinder.shouldReadModFile(name);
             boolean readable;
             try (var fs = FileSystems.newFileSystem(modFile.toPath())) {
                 readable = true;
